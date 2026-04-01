@@ -1,0 +1,80 @@
+    1  nmcli device status
+    2  nmcli connection modify enp0s3 ipv4.method manual ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.
+    3  nmcli connection modify enp0s3 ipv4.method manual ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.8
+    4  nmcli connection modify enp0s3 ipv6.method ignore
+    5  nmcli connection modify enp0s3 ipv6.method auto
+    6  nmcli connection modify enp0s3 ipv6.addresses ""
+    7* nmcli connection modify enp0s3 ipv6.gat
+    8  nmcli connection modify enp0s3 ipv4.method auto
+    9  nmcli connection modify enp0s3 ipv4.addresses ""
+   10  nmcli connection modify enp0s3 ipv4.gateway ""
+   11  nmcli connection modify enp0s3 ipv4.dns ""
+   12  nmcli connection modify enp0s3 ipv4.addresses ""
+   13  nmcli connection up enp0s3
+   14  nmcli connection modify enp0s8 ipv4.method manual ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.8
+   15  nmcli connection modify enp0s8 ipv6.method ignore
+   16  nmcli connection down enp0s8
+   17  nmcli connection up enp0s8
+   18  ip addr
+   19  hostnamectl set-hostname mephi-2026.domain.local
+   20  hostnamectl
+   21  ping -c 4 8.8.8.8 > /tmp/network_check.txt
+   22  ping -c 4 192.168.1.1 >> /tmp/network_check.txt
+   23  dnf install -y nginx tcpdump libcap-ng-utils dnf-plugins-core nano git policycoreutils-python-utils
+   24  cd /tmp
+   25  dnf download tcpdump
+   26  rpm -Uvh --replacepkgs tcpdump*.rpm
+   27  lsblk
+   28  fdisk /dev/sdb
+   29  mkfs.ext4 -L MEPHI_DATA /dev/sdb1
+   30  mkdir -p /data/mephi-web
+   31  echo 'LABEL=MEPHI_DATA /data/mephi-web ext4 defaults 0 2' >> /etc/fstab
+   32  mount -a
+   33  nano /etc/nginx/nginx.conf
+   34  nginx -t
+   35  systemctl enable --now nginx
+   36  firewall-cmd --permanent --add-service=http
+   37  firewall-cmd --reload
+   38  systemctl restart nginx
+   39  journalctl -u nginx --since "5 minutes ago" > /tmp/nginx_recent_logs.txt
+   40  groupadd mephi-devs
+   41  useradd -m -G mephi-devs mephi-admin
+   42  passwd mephi-admin
+   43  chown mephi-admin:mephi-devs /data/mephi-web
+   44  chmod 2775 /data/mephi-web
+   45  getenforce
+   46  semanage fcontext -a -t httpd_sys_content_t "/data/mephi-wev(/.*)?"
+   47  restorecon -Rv /data/mephi-web
+   48  chmod u-s /usr/sbin/tcpdump
+   49  setcap cap_net_raw,cap_net_admin+ep /usr/sbin/tcpdump
+   50  getcap /usr/sbin/tcpdump
+   51  sudo -u mephi-admin tcpdump --help
+   52  echo root > /etc/ssh/denied_users
+   53  nano /etc/ssh/sshd_config
+   54  systemctl restart sshd
+   55  su - mephi-admin
+   56  curl http://localhost
+   57  curl http://192.168.1.100
+   58  semanage fcontext -a -t httpd_sys_content_t "/data/mephi-web(/.*)?"
+   59  restorecon -Rv /data/mephi-web
+   60  systemctl restart nginx
+   61  curl http://localhost
+   62  curl http://192.168.1.100
+   63  ip route
+   64  ip route del default via 10.0.2.2
+   65  ip route
+   66  ping -c 4 8.8.8.8 > /tcp/network_check.txt
+   67  ping -c 4 8.8.8.8 > /tmp/network_check.txt
+   68  ping -c 4 192.168.1.1 >> /tmp/network_check.txt
+   69  ip route add default via 10.0.2.2 dev enp0s3
+   70  cp /etc/fstab ~/fstab.txt
+   71  getenforce > ~/selinux_status.txt
+   72  ls -Zd /data/mephi-web > ~/file_contexts.txt
+   73  getcap /usr/sbin/tcpdump > ~/tcpdump_capabilities.txt
+   74  stat /data/mephi-web > ~/permissions.txt
+   75  id mephi-admin > ~/users_groups.txt
+   76  getent group mephi-devs >> ~/users_groups.txt
+   77  curl -s http://192.168.1.100 > ~/curl_output.txt
+   78  cp /data/mephi-web/index.html ~/
+   79  cp /tmp/tcpdump*.rpm ~/
+   80  history > ~/project_history.txt
